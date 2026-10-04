@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Better Playlist Player</title>
+
+<link rel="stylesheet" href="src/css/base.css">
+<link rel="stylesheet" href="src/css/components.css">
+<link rel="stylesheet" href="src/css/layout.css">
+<link rel="stylesheet" href="src/css/player.css">
+<link rel="stylesheet" href="src/css/queue.css">
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <a id="logo" href="/">Better <span>Playlist</span> Player</a>
+    <div class="spacer"></div>
+    <button class="btn sm ghost icon" id="btnSettings" type="button"
+            aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19.14 12.94a7.5 7.5 0 0 0 0-1.88l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.65 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.5 7.5 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.12.22.38.3.6.22l2.39-.96c.5.38 1.04.7 1.63.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.63-.94l2.39.96c.22.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="main">
+    <!-- ============= left: player ============= -->
+    <div class="left">
+
+      <div class="stage" id="stage"><div id="player"></div></div>
+
+      <div class="now">
+        <h2 class="now-title" id="nowTitle">Nothing loaded</h2>
+        <div class="now-sub" id="nowSub">Add a playlist in the sidebar and press Load.</div>
+      </div>
+
+      <div class="controls">
+        <button class="cbtn" id="btnPrev" type="button" title="Previous (P)" aria-label="Previous">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2.5v12H6zM19 6v12l-9.5-6z"/></svg>
+        </button>
+
+        <button class="cbtn play" id="btnPlay" type="button" title="Play / pause (Space)" aria-label="Play or pause">
+          <svg viewBox="0 0 24 24" id="playIcon" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+
+        <button class="cbtn" id="btnNext" type="button" title="Next (N)" aria-label="Next">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 6H18v12h-2.5zM5 6l9.5 6L5 18z"/></svg>
+        </button>
+
+        <button class="cbtn" id="btnRepeat" type="button" title="Repeat: off / all / one" aria-label="Repeat mode">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 7h10v2.5L21 6l-4-3.5V5H5v6h2zm10 10H7v-2.5L3 18l4 3.5V19h12v-6h-2z"/>
+          </svg>
+          <span class="badge hidden" id="repeatBadge">1</span>
+        </button>
+
+        <!-- Fills the gap between the two button groups, and doubles as the
+             spacer that holds them apart: with the video up its contents go
+             invisible rather than away, because YouTube's own chrome already
+             carries a scrubber there. -->
+        <div class="seek off" id="seekRow">
+          <span class="time" id="tCur">0:00</span>
+          <input type="range" id="seek" min="0" max="1000" value="0" step="1"
+                 aria-label="Seek" disabled>
+          <span class="time" id="tDur">0:00</span>
+        </div>
+
+        <button class="cbtn" id="btnVideo" type="button" aria-pressed="false"
+                title="Video on - click to hide the video and keep the audio"
+                aria-label="Video on">
+          <svg viewBox="0 0 24 24" id="videoIcon" aria-hidden="true">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0
+                     11H4V6h16v9z"/>
+            <path d="M10.5 7.5v6l5-3z"/>
+            <path d="M13 17h-2v2H8v1.5h8V19h-3z"/>
+          </svg>
+        </button>
+
+        <button class="cbtn" id="btnMute" type="button" title="Mute (M)" aria-label="Mute">
+          <svg viewBox="0 0 24 24" id="volIcon" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/>
+          </svg>
+        </button>
+
+        <input type="range" class="vol hidden" id="vol" min="0" max="100" value="100"
+               aria-label="Volume">
+      </div>
+    </div>
+
+    <!-- ============= right: playlists + queue ============= -->
+    <div class="right">
+
+      <section class="sec" id="secPlaylists">
+        <button class="sec-title" id="btnPlaylists" type="button"
+                aria-expanded="true" aria-controls="playlistsBody"
+                title="Collapse or expand the playlists">
+          <svg class="sec-caret" viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M2 4h8l-4 4z"/>
+          </svg>
+          Playlists
+          <span class="dot warn hidden" id="plWarnDot" role="img"
+                title="A playlist loaded but came back short"
+                aria-label="A playlist loaded but came back short"></span>
+        </button>
+
+        <div class="sec-body" id="playlistsBody">
+          <div id="sources"></div>
+
+          <!-- Up only while no key can be found, in .env or in Settings. The
+               cap bites at Load, so the warning belongs next to that button
+               rather than buried in the modal. -->
+          <div class="notice hidden" id="noKeyNotice">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2 1 21h22L12 2zm1 14h-2v2h2v-2zm0-7h-2v5h2V9z"/>
+            </svg>
+            <div>
+              <p>
+                No YouTube API key, so how much can be loaded is limited:
+                playlists stop at roughly <b>200 videos</b> and titles arrive
+                late, a few seconds after the queue.
+              </p>
+              <button class="btn sm" id="btnNoKeySettings" type="button">
+                Add a key in Settings
+              </button>
+            </div>
+          </div>
+
+          <div class="row sec-btns" style="margin-top:10px">
+            <button class="btn sm" id="btnAdd" type="button">+ Add playlist</button>
+            <button class="btn sm primary" id="btnLoad" type="button">Load</button>
+            <span class="tiny muted" id="loadStatus" role="status"></span>
+          </div>
+      </div>
+    </section>
+
+      <div class="q-head">
+      <div class="row">
+          <button class="btn sm icon" id="btnShuffle" type="button"
+                  aria-pressed="false" aria-label="Shuffle"
+                  title="Toggle shuffled order - switching it back on draws a new order (S)">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41z
+                       M14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5z
+                       m.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+            </svg>
+          </button>
+
+          <button class="btn sm icon" id="btnThumbs" type="button"
+                  aria-pressed="true" aria-label="Thumbnails"
+                  title="Show or hide the queue thumbnails">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z
+                       m0 16H5V5h14v14z"/>
+              <path d="m13.96 12.29-2.75 3.54-1.96-2.36L6.5 17h11z"/>
+            </svg>
+          </button>
+          <div class="spacer"></div>
+          <span class="tiny muted" id="qCount" title="Position in the queue">0 / 0</span>
+      </div>
+        <div style="margin-top:8px">
+          <input type="text" id="qFilter" placeholder="Filter the queue..." aria-label="Filter the queue">
+      </div>
+      </div>
+
+      <div class="q-list" id="qList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============= settings ============= -->
+<!-- A modal rather than a page: the player behind it keeps its layout and its
+     iframe, so opening settings never resizes the video or cuts the audio.
+     <dialog> earns its keep here - Escape, the focus trap, the inert page
+     behind and the backdrop are all the element's own behaviour. -->
+<dialog class="modal" id="dlgSettings" aria-labelledby="dlgSettingsTitle">
+  <header>
+    <h1 id="dlgSettingsTitle">Settings</h1>
+    <div class="spacer"></div>
+    <button class="btn sm ghost icon" id="btnSettingsClose" type="button"
+            aria-label="Close settings" title="Close (Esc)">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19
+                 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="modal-body">
+
+    <section class="sec">
+      <div class="sec-title">YouTube Data API</div>
+
+      <label class="tiny muted" for="apiKey">API key (optional)</label>
+      <input type="password" id="apiKey" placeholder="AIza..."
+             autocomplete="off" spellcheck="false" style="margin-top:6px">
+
+      <div class="tiny hidden" id="envHint" style="margin-top:6px; color:var(--ok)"></div>
+
+      <div class="tiny muted" style="margin-top:8px; line-height:1.7">
+        Set <code>YOUTUBE_API_KEY</code> in the <code>.env</code> file to have this
+        filled in for you; anything typed here overrides it. Without a key the
+        player reads playlists through a hidden embed, which returns video IDs
+        only. Titles are filled in afterwards, and YouTube caps the embed
+        at roughly 200 items.
+      </div>
+
+      <!-- The walkthrough is only worth its space while there is no key; once
+           one is set, the paragraph above says all that is left to say. -->
+      <div class="tiny muted key-help hidden" id="apiKeyHelp" style="margin-top:10px">
+        <div class="key-help-title">Getting a key is free and takes only a couple of minutes</div>
+        <ol>
+          <li>
+            Open
+            <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a>
+            and sign in with a Google account.
+          </li>
+          <li>Create a project, or pick one, in the selector at the top of the page.</li>
+          <li>
+            <b>APIs &amp; Services</b> &rarr; <b>Library</b>, search for
+            <b>YouTube Data API v3</b>, open it and press <b>Enable</b>.
+          </li>
+          <li>
+            <b>APIs &amp; Services</b> &rarr; <b>Credentials</b> &rarr;
+            <b>Create credentials</b> &rarr; <b>API key</b>.
+          </li>
+          <li>
+            Copy the key (it starts with <code>AIza</code>) and paste
+            it in the box above, or into <code>.env</code> as
+            <code>YOUTUBE_API_KEY=AIza...</code> and reload.
+          </li>
+        </ol>
+        <div>
+          Worth doing while you are there: <b>Restrict key</b> on the credential and
+          limit it to the YouTube Data API. The free quota is 10,000 units a day,
+          which is far more than this player can spend. Reading a playlist
+          costs one unit per 50 videos.
+        </div>
+        <div style="margin-top:6px">
+          The key is only ever stored in this browser, and it is sent to
+          <code>googleapis.com</code> and nowhere else.
+          <a href="https://developers.google.com/youtube/v3/getting-started"
+             target="_blank" rel="noopener">Google's own guide</a>
+          covers the same ground in more detail.
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-title">Stored data</div>
+
+      <div class="tiny muted" style="margin-bottom:10px; line-height:1.7">
+        Titles are cached in this browser so a reload does not re-fetch them.
+        Resetting clears the playlists, the queue, and everything in here.
+      </div>
+
+      <div class="row">
+        <!-- A newline in a title renders as one in the tooltip, so each stays
+             on a single line however long that line runs. -->
+        <button class="btn sm" id="btnClearTitles" type="button"
+                title="Forget the cached video titles. Playlists and the queue are kept.">Clear title cache</button>
+        <button class="btn sm" id="btnReset" type="button"
+                title="Clear the playlists, the queue and the key typed here, then reload. A key in .env and the title cache are kept.">Reset everything</button>
+      </div>
+    </section>
+
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Offscreen host for the hidden player that reads playlists. -->
+<div id="embedHost"></div>
+
+<!-- Opened straight off the disk, ES modules are blocked by CORS and nothing
+     below would run. Classic script, so this check itself always executes. -->
+<script>
+if (location.protocol === 'file:') {
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:0;z-index:99;background:#0e1013;color:#e7eaf0;' +
+    'display:flex;align-items:center;justify-content:center;text-align:center;' +
+    'font:14px/1.8 \'Segoe UI\',system-ui,sans-serif;padding:24px">' +
+    '<div><div style="font-size:17px;font-weight:600;margin-bottom:10px">' +
+    'Please start this with <code style="color:#ff4d5a">serve.cmd</code></div>' +
+    'This page is built from JavaScript modules, which browsers refuse to load ' +
+    'over <code>file://</code>.<br>Double-click <b>serve.cmd</b> in the project ' +
+    'folder and it will open at <b>http://localhost:8123</b>.</div></div>');
+}
+</script>
+
+<script type="module" src="src/js/main.js"></script>
+</body>
+</html>

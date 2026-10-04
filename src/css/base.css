@@ -1,0 +1,72 @@
+/* Design tokens, reset, and page-level typography. */
+
+:root {
+  --bg: #0f0f0f;
+  --panel: #222222;
+  --line: #303030;
+
+  --btn-bg: #222222;
+  --btn-bg-hover: #393939;
+
+  --text: #f1f1f1;
+  --dim: #a1a1a1;
+  --faint: #6b6b6b;
+
+  --accent: #ff0033;
+  --accent-hover: #158b8b;
+  --accent-2: #5b8cff;
+  --accent-3: #158b8b;
+  --ok: #3ecf8e;
+  --warn: #ffc14d;
+
+  --radius: 8px;
+  --radius-lg: 10px;
+
+  --font: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select { font: inherit; color: inherit; }
+
+button { cursor: pointer; }
+
+a { color: var(--faint); text-decoration: none; }
+a:hover { color: var(--text); text-decoration: underline; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2c323c; border-radius: var(--radius); }
+::-webkit-scrollbar-thumb:hover { background: #3a424f; }
+::-webkit-scrollbar-track { background: transparent; }
+
+:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* --- utility ------------------------------------------------------------ */
+
+.spacer { flex: 1; }
+.muted { color: var(--dim); }
+.tiny { font-size: 12px; }
+.hidden { display: none !important; }
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}

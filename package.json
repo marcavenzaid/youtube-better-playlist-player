@@ -1,0 +1,14 @@
+{
+  "name": "youtube-better-playlist-player",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local YouTube playlist player with a properly randomised shuffle",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

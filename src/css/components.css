@@ -1,0 +1,285 @@
+/* Reusable widgets: buttons, inputs, toggles, dots, toast, help block. */
+
+.btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  transition: background .12s, border-color .12s, transform .05s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { 
+  background: var(--btn-bg-hover); 
+  border-color: #39414e; 
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--btn-bg); border-color: var(--line); }
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+/* Pressed queue toggles. Off they are an ordinary .btn, matching Add playlist;
+   on they are the same grey pressed darker - a recessed button rather than a
+   second colour in the row. Hover stays a step darker than the off hover so
+   the pair keep their order under the cursor. */
+.btn.on { 
+  background: var(--bg); 
+}
+.btn.on:hover { 
+  background: var(--btn-bg-hover); 
+  border-color: var(--line); 
+}
+
+.btn.ghost { background: transparent; }
+.btn.sm { padding: 4px 9px; font-size: 12px; border-radius: 6px; }
+
+/* Icon-only .btn. The 5px padding around a 16px glyph matches the 28px height
+   .btn.sm gets from its text, so the two sit level in the same row. With no
+   text to name the button, title and aria-label carry the label instead. */
+.btn.icon { padding: 5px; }
+.btn.icon svg { width: 16px; height: 16px; fill: currentColor; display: block; }
+
+/* --- notices ------------------------------------------------------------ */
+
+/* Shown beside Load when no key is configured. Amber rather than red: the
+   player still works without a key, it just works less well. `flex: 0 0 auto`
+   keeps it whole when the playlists list above it wants the space. */
+.notice {
+  display: flex;
+  gap: 9px;
+  flex: 0 0 auto;
+  margin: 10px 10px 0px 10px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 193, 77, .3);
+  border-radius: var(--radius);
+  background: rgba(255, 193, 77, .07);
+}
+
+.notice svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  fill: var(--warn);
+}
+
+.notice p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--dim);
+}
+
+.notice .btn { border-color: rgba(255, 193, 77, .35); }
+.notice .btn:hover { border-color: var(--warn); }
+
+/* --- help block --------------------------------------------------------- */
+
+/* The step-by-step in Settings, up only while there is no key to be found.
+   Numbers hang in the left padding so the steps line up with the prose. */
+.key-help {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #0f1216;
+  padding: 11px 13px;
+  line-height: 1.7;
+}
+
+.key-help-title {
+  color: var(--text);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.key-help ol {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+.key-help li { margin-bottom: 4px; }
+.key-help b { color: var(--dim); font-weight: 600; }
+.key-help a { color: var(--accent-2); }
+.key-help a:hover { color: var(--accent-2); }
+
+/* --- modal -------------------------------------------------------------- */
+
+/* Only ever laid out while open: the UA hides a closed <dialog> with
+   `display: none`, and a bare `display: flex` here would out-specify that and
+   leave the thing on screen. */
+.modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal {
+  padding: 0;                      /* the header and body own their spacing */
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;                 /* a step up from the 14px page; the rules
+                                      below carry the same step to the pieces
+                                      that pin a size of their own */
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(88vh, 940px);
+  overflow: hidden;                /* so the header cannot escape the corners */
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .55);
+}
+
+.modal::backdrop {
+  background: rgba(6, 8, 11, .62);
+  backdrop-filter: blur(2px);
+}
+
+/* Long help text stays readable; the header above it does not scroll away. */
+.modal-body {
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.modal-body .sec:last-child { border-bottom: none; }
+
+/* Settings is read rather than glanced at, so it runs a size larger than the
+   app around it. Every rule here is scoped to .modal: the same classes keep
+   their compact size out in the player, where the space is scarcer. The
+   padding grows with the text so the sections do not close in on it. */
+.modal header { padding: 14px 20px; }
+
+/* The title takes the modal's larger base with it (2em, so 32px). Its default
+   em margins would turn the header into a banner at that size, hence the 0:
+   the padding above already spaces it. */
+.modal h1 { font-size: 2em; margin: 0; }
+
+.modal .sec { padding: 18px 20px; }
+.modal .sec-title { font-size: 12px; letter-spacing: 1px; margin-bottom: 12px; }
+.modal .tiny { font-size: 14px; }
+.modal .btn.sm { font-size: 14px; padding: 6px 12px; }
+.modal .btn.icon { padding: 6px; }
+.modal .btn.icon svg { width: 18px; height: 18px; }
+
+.modal input[type="text"],
+.modal input[type="password"] { padding: 10px 12px; }
+
+.modal .key-help { padding: 13px 16px; }
+.modal .key-help ol { padding-left: 22px; }
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--faint);
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .12s, background .12s;
+}
+.icon-btn:hover { color: var(--text); background: #242a33; }
+
+input[type="text"],
+input[type="password"] {
+  background: #0f1216;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  width: 100%;
+  outline: none;
+  transition: border-color .12s;
+}
+input[type="text"]:focus,
+input[type="password"]:focus { border-color: var(--accent-2); }
+input::placeholder { color: var(--faint); }
+
+/* Playlist colour marker. */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 0px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .05);
+}
+.dot.sm { width: 3px; height: 3px; border-radius: 0px; box-shadow: none; }
+
+/* Beside a section heading rather than a playlist row: something inside loaded
+   short. Given its own colour rather than a source colour so it does not read
+   as one of the playlist markers, which cycle through this same amber. */
+.dot.warn { background: var(--warn); }
+
+/* On/off switch for including a playlist. */
+.toggle {
+  width: 34px;
+  height: 20px;
+  border-radius: 99px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  position: relative;
+  flex: 0 0 auto;
+  padding: 0;
+  transition: background .15s, border-color .15s;
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--faint);
+  transition: left .15s, background .15s;
+}
+.toggle.on { 
+  background: var(--btn-bg); 
+}
+.toggle.on::after { 
+  left: 16px; 
+  background: var(--text); 
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(14px);
+  background: var(--accent-3);
+  border: 1px solid var(--accent-3);
+  border-radius: var(--radius);
+  padding: 9px 15px;
+  font-size: 13px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 50;
+  max-width: 80vw;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+code {
+  background: #0f1216;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: .92em;
+}
+
+/* Offscreen host for the playlist-reading player. It must have real size and
+   must not be display:none, or YouTube will refuse to initialise it. */
+#embedHost {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+  pointer-events: none;
+}

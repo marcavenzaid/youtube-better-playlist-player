@@ -1,0 +1,104 @@
+/* The queue panel. */
+
+.q-head {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+
+.q-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0 30px;
+  /* The list is virtualised: swapping the window's children out from under the
+     scroller makes Chrome's scroll anchoring "correct" scrollTop, and the list
+     fights itself while scrolling fast. */
+  overflow-anchor: none;
+}
+
+/* Virtualised list scaffolding. ui/queue.js sizes the two spacers so the
+   scrollbar matches the whole queue while only the visible rows exist in the
+   DOM. Do not give these padding or margins - the scroll maths assumes the
+   spacers are exactly the height JS sets and nothing more. Row spacing belongs
+   on .q-item, list spacing on .q-list. */
+.q-win, .q-pad { margin: 0; padding: 0; }
+
+/* The one-off row ui/queue.js measures to read the row height back out of CSS.
+   Hidden rather than removed from flow: it has to be laid out to be measured. */
+.q-probe { visibility: hidden; }
+
+.q-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.q-item:hover { 
+  background: var(--btn-bg-hover); 
+}
+
+.q-item.current {
+  background: #ff00331a;
+  border-left-color: var(--accent);
+}
+.q-item.current .q-title {
+  font-weight: 600;
+}
+
+/* Failed to play; next()/prev() step over these. */
+.q-item.bad .q-title {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.q-num {
+  width: 26px;
+  flex: 0 0 auto;
+  text-align: center;
+  font-size: 11px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.q-thumb {
+  width: 52px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 4px;
+  background: #000;
+  object-fit: cover;
+}
+
+/* Thumbnails off: the rows collapse to a tighter, text-only list. The <img>
+   itself is left out of the markup, not hidden here. */
+.q-list.no-thumbs .q-item { padding-top: 3px; padding-bottom: 3px; }
+
+.q-body { flex: 1; min-width: 0; }
+
+.q-title {
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.q-src {
+  font-size: 11px;
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.empty {
+  padding: 40px 22px;
+  text-align: center;
+  color: var(--faint);
+  font-size: 13px;
+  line-height: 1.8;
+}

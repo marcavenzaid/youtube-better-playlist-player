@@ -1,0 +1,198 @@
+/* Video stage, now-playing block, seek bar, transport controls. */
+
+/* The stage is a full-width black band; the player inside it is what holds the
+   16:9 box. Putting the ratio on the band instead would break it, because the
+   height cap below trims the height while the width stays at 100%, leaving a
+   box wider than the ratio asks for. Capping the *width* at the widest 16:9
+   box that still fits the height instead keeps the ratio exact at every size,
+   and the leftover band on either side reads as ordinary pillarboxing. */
+.stage {
+  /* Sized like a YouTube watch page: the video takes the full width of its
+     column, and the only thing holding it back is having to leave room for
+     what sits under it. That is the now-playing block (~81px with the title
+     on its second line), the transport row (70px) and the header above
+     (~43px) - 200px covers the lot with a little slack, so nothing below the
+     video needs scrolling to reach. The seek row rides inside the transport
+     row, so it costs no height of its own. The floor keeps the player usable
+     on a short window, where scrolling is the better trade. */
+  --stage-max-h: max(180px, calc(100vh - 200px));
+
+  background: #000;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* Stacked layout: the queue already claims 55vh below, so the tall cap above
+   would push the transport row off the screen. */
+@media (max-width: 900px) {
+  .stage { --stage-max-h: 40vh; }
+}
+
+/* Matches the placeholder div as well as the iframe the API swaps in for it,
+   so the space is reserved before the player loads and nothing jumps. */
+.stage > * {
+  display: block;
+  width: 100%;
+  max-width: calc(var(--stage-max-h) * 16 / 9);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+}
+
+/* Audio-only collapses the stage rather than hiding it: a display:none player
+   gets suspended by YouTube and stops producing sound. */
+.stage.audio {
+  height: 0;
+  overflow: hidden;
+}
+
+.now { 
+  padding: 14px 16px 6px; 
+}
+
+.now-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0 0 4px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.now-sub {
+  font-size: 12px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  min-height: 18px;
+}
+.now-sub .sep { color: var(--faint); }
+.now-sub .sep::before { content: "\2022  "; }
+
+/* --- seek ----------------------------------------------------------------
+
+   The seek row and the volume slider stand in for YouTube's own controls,
+   which go away with the video. The seek row sits in the transport row,
+   between the two button groups, and takes over the spacer's old job of
+   holding them apart - so with the video up it goes invisible rather than
+   away, or the buttons would slide together. The mute button and the volume
+   slider sit at the end of the row, where nothing depends on the space they
+   take, so they can be hidden outright. */
+
+.seek {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  /* Lets the slider shrink past its intrinsic width on a narrow window
+     instead of pushing the buttons out of the row. */
+  min-width: 0;
+  margin: 0 6px;
+}
+.seek input[type="range"] { min-width: 0; }
+.seek.off > * { visibility: hidden; }
+
+.time {
+  font-size: 13px;
+  color: var(--faint);
+  /* Wide enough for h:mm:ss, so the bar does not shift when a long video
+     crosses the hour. */
+  width: 52px;
+  text-align: center;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 18px;
+  flex: 1;
+  margin: 0;
+  cursor: pointer;
+}
+/* The played side is the track itself, painted with a hard-stop gradient: a
+   second element laid over it would sit above the thumb, and ::-moz-range-
+   progress has no WebKit counterpart. --fill is set from JS on the input,
+   which the pseudo-element inherits. */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 99px;
+  background:
+    linear-gradient(to right,
+      var(--accent) 0 var(--fill, 0%),
+      #2b313b var(--fill, 0%) 100%);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  margin-top: -4px;
+  transition: background .12s, transform .12s;
+}
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: var(--accent);
+  transform: scale(1.15);
+}
+input[type="range"]:disabled { opacity: .4; cursor: default; }
+input[type="range"].vol { flex: 0 0 84px; }
+
+/* --- transport ---------------------------------------------------------- */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background-color: var(--panel);
+}
+
+.cbtn {
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .12s, background .12s, opacity .12s;
+  position: relative;
+}
+.cbtn:hover { color: var(--text); background: #20252d; }
+.cbtn svg { width: 23px; height: 23px; fill: currentColor; }
+
+.cbtn.active { color: var(--accent-2); }
+.cbtn.dim { opacity: .55; }
+
+.cbtn.play {
+  color: #fff;
+  width: 42px;
+  height: 42px;
+}
+.cbtn.play:hover { background: var(--accent-hover); }
+.cbtn.play svg { width: 27px; height: 27px; }
+
+/* "1" marker on the repeat button in repeat-one mode. */
+.badge {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  font-size: 9px;
+  font-weight: 800;
+  background: var(--accent-2);
+  color: #0b0d10;
+  border-radius: 4px;
+  padding: 0 3px;
+  line-height: 12px;
+}

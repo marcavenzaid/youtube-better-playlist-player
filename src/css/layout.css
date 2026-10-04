@@ -1,0 +1,197 @@
+/* App shell: header, the two-column split, and the panel sections. */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  flex: 0 0 auto;
+}
+
+header #logo a,
+header #logo a:visited {
+  text-decoration: none !important;
+}
+header #logo a:hover,
+header #logo a:visited:hover {
+  text-decoration: none !important;
+}
+header #logo {
+  font-size: 15px;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: .2px;
+  text-decoration: none;
+  color: var(--text);
+}
+header #logo span { color: var(--accent); }
+header #logo:hover span { color: var(--accent-hover); }
+
+.main {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(330px, 430px);
+  flex: 1;
+  min-height: 0;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--line);
+  background: var(--bg);
+}
+
+@media (max-width: 900px) {
+  .main { display: flex; flex-direction: column; }
+  .right {
+    border-left: none;
+    border-top: 1px solid var(--line);
+    height: 55vh;
+    flex: 0 0 auto;
+  }
+}
+
+/* --- panel sections ----------------------------------------------------- */
+
+.sec {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+
+.sec-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* A section header that doubles as its own collapse control: it keeps the
+   .sec-title look and only sheds the button chrome. */
+button.sec-title {
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  transition: color .12s;
+}
+button.sec-title:hover { color: var(--dim); }
+
+/* Collapsed, the header is the whole section, so its gap to the body goes. */
+button.sec-title[aria-expanded="false"] { margin-bottom: 0; }
+
+.sec-caret {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  fill: currentColor;
+  transition: transform .15s;
+}
+button.sec-title[aria-expanded="false"] .sec-caret { transform: rotate(-90deg); }
+
+/* Sharing the sidebar column with the queue: match the queue head above the
+   fold, and let a long list scroll inside its own slice of the panel rather
+   than pushing the queue off the bottom. */
+#secPlaylists {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 45%;
+  padding: 12px 0px;
+  margin-left: 2px;
+}
+
+#secPlaylists .sec-title { 
+  flex: 0 0 auto; 
+  padding: 0px 10px;
+}
+
+/* Everything the header collapses. Hidden, the section shrinks to its title. */
+.sec-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.sec-body .row { flex: 0 0 auto; }
+
+#secPlaylists #sources {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0px 10px;
+}
+
+#secPlaylists .sec-btns {
+  padding: 0px 10px;
+}
+
+/* --- playlist rows ------------------------------------------------------ */
+
+.src { margin-bottom: 9px; }
+.src-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.src .grow { flex: 1; min-width: 0; }
+
+/* The lines under the input start where the input does: past the 3px dot and
+   the 8px gap after it. */
+.src-name,
+.src-meta { margin-left: 11px; }
+
+/* The playlist's own name, once a load has found it. */
+.src-name {
+  font-size: 11px;
+  color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.src-name:empty { display: none; }
+
+/* Compact: a playlist row is mostly a fixed-length ID, so the full-size input
+   the other fields use is heavier than it needs to be. Scoped to .src so the
+   API key field and the queue filter keep the standard size. */
+.src input[type="text"] {
+  padding: 4px 8px;
+  font-size: 12.5px;
+  border-radius: 6px;
+}
+
+/* Holds an error or a short-load note, so the row closes up when there is
+   neither. Red is the default because a failure was the only case for a long
+   time; .warn overrides it for a playlist that did load. */
+.src-meta {
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.src-meta:empty { display: none; }
+.src-meta.warn { color: var(--warn); }
