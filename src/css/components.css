@@ -27,6 +27,16 @@
 }
 .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
+/* Destructive actions. Its own red rather than --accent, whose hover turns
+   teal: a button that wipes data should stay red under the cursor too. */
+.btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  font-weight: 600;
+}
+.btn.danger:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+
 /* Pressed queue toggles. Off they are an ordinary .btn, matching Add playlist;
    on they are the same grey pressed darker - a recessed button rather than a
    second colour in the row. Hover stays a step darker than the off hover so
@@ -128,7 +138,7 @@
   font-size: 16px;                 /* a step up from the 14px page; the rules
                                       below carry the same step to the pieces
                                       that pin a size of their own */
-  width: min(760px, calc(100vw - 32px));
+  width: min(960px, calc(100vw - 32px));
   max-height: min(88vh, 940px);
   overflow: hidden;                /* so the header cannot escape the corners */
   box-shadow: 0 18px 48px rgba(0, 0, 0, .55);
@@ -170,6 +180,31 @@
 
 .modal .key-help { padding: 13px 16px; }
 .modal .key-help ol { padding-left: 22px; }
+
+/* What each Stored data button does, one item per button, above the buttons. */
+.stored-help {
+  margin: 10px 0 14px;
+  padding-left: 20px;
+  line-height: 1.7;
+}
+.stored-help li { margin-bottom: 6px; }
+
+/* The live sizes, set apart from the prose above as the one line that changes. */
+.stored-usage {
+  margin-bottom: 12px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stored-help b,
+#dlgResetBody b { color: var(--text); font-weight: 600; }
+
+/* The reset confirmation: a short question, so a narrower box and a title
+   that does not need Settings' 2em. */
+.modal.confirm { width: min(480px, calc(100vw - 32px)); }
+.modal.confirm h1 { font-size: 1.25em; }
+#dlgResetBody p { margin: 0 0 8px; }
+#dlgResetBody ul { margin: 0 0 8px; padding-left: 20px; }
+.confirm-actions { justify-content: flex-end; margin-top: 16px; }
 
 .icon-btn {
   background: transparent;

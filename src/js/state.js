@@ -82,6 +82,11 @@ export function newSource(raw = '') {
 
 let saveTimer = null;
 
+// Set by reset() and never cleared: the page reloads straight after, and the
+// pagehide flush on the way out would otherwise write the session it just
+// removed back into storage.
+let resetting = false;
+
 /** Debounced; called from lots of hot paths (volume drags, seeks). */
 export function save() {
   clearTimeout(saveTimer);
@@ -90,6 +95,7 @@ export function save() {
 
 export function saveNow() {
   clearTimeout(saveTimer);
+  if (resetting) return;
   storage.write(LS_STATE, {
     sources: state.sources.map((s) => ({
       uid: s.uid, raw: s.raw, plId: s.plId, name: s.name, title: s.title || '',
@@ -158,7 +164,10 @@ export function restore() {
   return true;
 }
 
+/** Forget the saved session. Callers reload the page straight after. */
 export function reset() {
+  resetting = true;
+  clearTimeout(saveTimer);
   storage.remove(LS_STATE);
 }
 

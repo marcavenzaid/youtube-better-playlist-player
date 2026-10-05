@@ -48,6 +48,15 @@
   overflow: hidden;
 }
 
+/* The collapsed stage only clips the player, so on its own YouTube would keep
+   streaming HD into a box nobody sees. Shrinking the player too steers its
+   auto quality down to a low resolution. Audio is a separate stream and keeps
+   its quality. 356x200 holds 16:9 at YouTube's 200px minimum for embeds. */
+.stage.audio > * {
+  width: 356px;
+  max-width: none;
+}
+
 .now { 
   padding: 14px 16px 6px; 
 }

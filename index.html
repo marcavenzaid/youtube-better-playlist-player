@@ -250,21 +250,92 @@
     <section class="sec">
       <div class="sec-title">Stored data</div>
 
-      <div class="tiny muted" style="margin-bottom:10px; line-height:1.7">
-        Titles are cached in this browser so a reload does not re-fetch them.
-        Resetting clears the playlists, the queue, and everything in here.
+      <div class="tiny muted" style="line-height:1.7">
+        The player keeps two things in this browser, and nothing is uploaded anywhere:
       </div>
+
+      <!-- Named here so the buttons below and the sizes under them can refer
+           back to "the saved session" and "the title cache" by name. -->
+      <ul class="tiny muted stored-help">
+        <li>
+          <b>Saved session:</b> your playlists, the loaded tracks and the queue
+          order, the track you are on, the player settings (shuffle, repeat,
+          volume, mute, audio only, thumbnails) and any API key typed above. This
+          is what lets a reload pick up where you left off.
+        </li>
+        <li>
+          <b>Title cache:</b> video titles from earlier loads, so a load without
+          an API key can show titles straight away.
+        </li>
+      </ul>
+
+      <div class="tiny muted" style="line-height:1.7">
+        Thumbnails are not stored by the player. Your browser caches those images
+        on its own.
+      </div>
+
+      <ul class="tiny muted stored-help">
+        <li>
+          <b>Clear title cache:</b> empties the title cache, freeing the space shown
+          below. The saved session is not touched, so titles already in the queue
+          stay until you press Load again. It only changes titles when you load
+          without an API key: they are then looked up afresh. With a key, every
+          load gets current titles from YouTube anyway, and a video's title is
+          also corrected whenever it starts playing.
+        </li>
+        <li>
+          <b>Reset everything:</b> deletes the saved session, then reloads the
+          page. A key in <code>.env</code> and the title cache are kept. This
+          cannot be undone.
+        </li>
+      </ul>
+
+      <!-- Filled in each time Settings opens and after Clear title cache. -->
+      <div class="tiny stored-usage" id="storedUsage"></div>
 
       <div class="row">
         <!-- A newline in a title renders as one in the tooltip, so each stays
              on a single line however long that line runs. -->
         <button class="btn sm" id="btnClearTitles" type="button"
-                title="Forget the cached video titles. Playlists and the queue are kept.">Clear title cache</button>
-        <button class="btn sm" id="btnReset" type="button"
-                title="Clear the playlists, the queue and the key typed here, then reload. A key in .env and the title cache are kept.">Reset everything</button>
+                title="Forget the cached video titles. Playlists and the queue, with their titles, are kept until the next Load.">Clear title cache</button>
+        <button class="btn sm danger" id="btnReset" type="button"
+                title="Clear the playlists, the queue, the settings and the key typed here, then reload. Asks first.">Reset everything</button>
       </div>
     </section>
 
+  </div>
+</dialog>
+
+<!-- Stacked over Settings rather than inside it: a second showModal() goes on
+     top, and Escape or the backdrop closes only this one. The form's
+     method="dialog" closes it with the pressed button's value as returnValue. -->
+<dialog class="modal confirm" id="dlgReset" aria-labelledby="dlgResetTitle"
+        aria-describedby="dlgResetBody">
+  <header>
+    <h1 id="dlgResetTitle">Reset everything?</h1>
+  </header>
+
+  <div class="modal-body">
+    <section class="sec">
+      <div id="dlgResetBody" class="tiny muted" style="line-height:1.7">
+        <p>Pressing <b>Reset everything</b> permanently removes from this browser:</p>
+        <ul>
+          <li>every playlist you have added</li>
+          <li>the queue, and the track you are on</li>
+          <li>shuffle, repeat, volume, mute, audio only and thumbnails, back to their defaults</li>
+          <li>the API key typed in Settings</li>
+        </ul>
+        <p>
+          Kept: a key in <code>.env</code>, and the cached video titles.
+          The page reloads straight away, and this cannot be undone.
+        </p>
+      </div>
+
+      <form method="dialog" class="row confirm-actions">
+        <button class="btn sm" type="submit" value="cancel" autofocus>Cancel</button>
+        <button class="btn sm danger" type="submit" value="reset">Reset everything</button>
+      </form>
+    </section>
   </div>
 </dialog>
 

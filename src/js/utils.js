@@ -33,6 +33,17 @@ export function fmtTime(sec) {
 }
 
 /**
+ * Byte count to B, KB or MB, in 1024s. One decimal while the number is small
+ * enough for it to matter.
+ * @param {number} n
+ */
+export function fmtBytes(n) {
+  if (n < 1024) return `${n} B`;
+  const [value, unit] = n < 1024 * 1024 ? [n / 1024, 'KB'] : [n / (1024 * 1024), 'MB'];
+  return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${unit}`;
+}
+
+/**
  * Colour a range input's track up to its current value. The CSS reads --fill;
  * every place that writes `.value` has to call this, since a range input has
  * no way of telling CSS where its thumb sits.

@@ -54,6 +54,21 @@ export function write(key, value) {
   }
 }
 
+/**
+ * Roughly what a key costs against the quota. Browsers keep the strings as
+ * UTF-16, two bytes a character, and count the key's name as well as its value.
+ * @param {string} key
+ * @returns {number} bytes, 0 when nothing is stored
+ */
+export function bytes(key) {
+  try {
+    const raw = backing ? backing.getItem(key) : memory.get(key);
+    return raw == null ? 0 : (key.length + raw.length) * 2;
+  } catch {
+    return 0;
+  }
+}
+
 /** @param {string} key */
 export function remove(key) {
   memory.delete(key);

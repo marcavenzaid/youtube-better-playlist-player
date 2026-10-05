@@ -53,27 +53,43 @@ The bundled server is plain Node with no dependencies.
    as a dot beside every track it contributed.
 3. **Load**.
 
-Playlists, queue, and position are saved to `localStorage`, so reopening puts you back where you were. Press **Load** again to re-fetch. 
+Playlists, the queue, the track you're on (not the time within it), and your player settings are saved to `localStorage`, so reopening puts you back where you were. Press **Load** again to re-fetch. 
 The per-playlist switch excludes a source from the next load without deleting the ID. 
 If a playlist loads but stops early, its tracks are kept, and a warning appears under it in the sidebar.
 
 `Space` play/pause
-`N` next
-`P` previous
-`S` shuffle
+`N (Shift + n)` next
+`P (Shift + p)` previous
+`S (Shift + s)` shuffle
 `←` `→` seek 5s 
-`M` mute (audio-only mode)
+`m/M` mute (with video off)
 
 Repeat cycles **off -> all -> one**, starting at *all*. 
 With repeat off, playback stops at the end of the queue.
 
-The screen button drops the video and keeps the audio. 
-A seek bar, a mute button and a volume slider appear alongside it, since hiding the video takes
-YouTube's own controls with it. 
+The screen button switches between **video on** and **video off**. 
+Video off drops the video and keeps the audio. 
+A seek bar, a mute button and a volume slider appear alongside it, since hiding the video takes YouTube's own controls with it. 
 With the video showing, `M` is left to YouTube's player.
 
+**What video off saves:** 
+The video is hidden, not stopped. 
+YouTube has no audio-only stream for embeds, so the player keeps downloading and decoding video. 
+It can't be removed either, because YouTube suspends a `display:none` player and the sound stops with it. 
+To keep that cost down, the hidden player is also shrunk to 356×200, which steers YouTube's auto quality to a low resolution (around 240p, higher with display scaling). 
+Audio is a separate stream and keeps its quality. 
+Turning the video back on restores full size, and the quality climbs back up within a few seconds. 
+Code can't pick a quality directly: YouTube ignores `setPlaybackQuality` and similar options, so player size is the only lever.
+
+To check it:
+1. Turn on "Stats For Nerds", then check the "Current / Optimal Res" and "Codecs". Also, check the YouTube video Quality. 
+2. Turn the video off. After a couple of seconds, turn the video on again.
+3. Check the "Current / Optimal Res" and "Codecs" in the "Stats For Nerds". Then, check the YouTube video Quality. If it is lower, then it is successful.
+
 The queue panel can hide thumbnails. 
-Settings also has **Clear title cache** (playlists and queue are kept) and **Reset everything** (clears playlists, queue and the typed key; a `.env` key and the title cache survive).
+Settings -> **Stored data** shows how much the browser is holding, split into the **saved session** (playlists, the queue and your place in it, player settings, and a typed API key) and the **title cache**. 
+**Clear title cache** empties the cache. The queue keeps its titles, and the cache only matters on the next **Load** without an API key. 
+**Reset everything** asks first, then deletes the saved session and reloads. A `.env` key and the title cache survive.
 
 ## Project layout
 
@@ -86,7 +102,7 @@ package.json          Scripts only. No dependencies
 
 src/css/
   base.css            Design tokens, reset, utilities
-  components.css      Buttons, inputs, toggles, toast
+  components.css      Buttons, inputs, toggles, modals, toast
   layout.css          App shell, columns, playlist rows
   player.css          Video stage, seek bar, transport
   queue.css           The queue panel
@@ -181,3 +197,5 @@ These are YouTube's, not the player's:
 - Some videos are blocked from embedding. Those are struck through in the
   queue and skipped automatically.
 - Without an API key, playlists are capped at roughly 200 items.
+- Video off still streams video, at low quality. Embeds have no
+  audio-only stream, and quality can't be set from code.

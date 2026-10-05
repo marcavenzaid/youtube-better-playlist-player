@@ -1,9 +1,10 @@
 /** Transport buttons, shuffle controls, the settings modal, keyboard shortcuts. */
 
-import { SEEK_STEP_SEC } from '../config.js';
-import { state, save, buildOrder, reset } from '../state.js';
+import { SEEK_STEP_SEC, LS_STATE, LS_TITLES } from '../config.js';
+import { state, save, saveNow, buildOrder, reset } from '../state.js';
 import { emit, on, EV } from '../events.js';
-import { $, toast, fmtTime, paintRange } from '../utils.js';
+import { $, toast, fmtTime, fmtBytes, paintRange } from '../utils.js';
+import * as storage from '../storage.js';
 import * as playback from '../playback.js';
 import * as titles from '../titles.js';
 import * as env from '../env.js';
@@ -163,7 +164,31 @@ function wireSeek() {
 function wireSettings() {
   const dlg = $('dlgSettings');
 
-  $('btnSettings').addEventListener('click', () => dlg.showModal());
+  // Read on every open rather than kept live: the sizes only move on loads,
+  // track starts and the buttons below. Both saves are flushed first, since
+  // each runs behind a debounce or a batch and storage could still hold the
+  // previous copy.
+  const syncUsage = () => {
+    const el = $('storedUsage');
+    if (!storage.isPersistent) {
+      el.textContent = 'This browser is blocking site storage, so nothing here survives a reload.';
+      return;
+    }
+    saveNow();
+    titles.persist();
+    const n = titles.size();
+    el.textContent =
+      `Title cache: ${n.toLocaleString()} title${n === 1 ? '' : 's'} ` +
+      `(${fmtBytes(storage.bytes(LS_TITLES))}) · ` +
+      `Saved session: ${fmtBytes(storage.bytes(LS_STATE))}`;
+  };
+
+  const openSettings = () => {
+    syncUsage();
+    dlg.showModal();
+  };
+
+  $('btnSettings').addEventListener('click', openSettings);
   $('btnSettingsClose').addEventListener('click', () => dlg.close());
 
   // A click that lands on the dialog itself came down on the backdrop: the
@@ -193,7 +218,7 @@ function wireSettings() {
     $('noKeyNotice').classList.toggle('hidden', !none);
   };
 
-  $('btnNoKeySettings').addEventListener('click', () => dlg.showModal());
+  $('btnNoKeySettings').addEventListener('click', openSettings);
 
   key.addEventListener('input', (e) => {
     state.apiKey = e.target.value;
@@ -206,11 +231,22 @@ function wireSettings() {
   $('btnClearTitles').addEventListener('click', () => {
     const n = titles.size();
     titles.clear();
+    syncUsage();
     toast(`Cleared ${n} cached title${n === 1 ? '' : 's'}.`);
   });
 
+  // Only the confirm button's value resets. Escape, the backdrop and Cancel
+  // all leave returnValue as the '' it is cleared to on opening.
+  const confirmReset = $('dlgReset');
   $('btnReset').addEventListener('click', () => {
-    if (!confirm('Clear all playlists, the queue, and settings?')) return;
+    confirmReset.returnValue = '';
+    confirmReset.showModal();
+  });
+  confirmReset.addEventListener('click', (e) => {
+    if (e.target === confirmReset) confirmReset.close();
+  });
+  confirmReset.addEventListener('close', () => {
+    if (confirmReset.returnValue !== 'reset') return;
     reset();
     location.reload();
   });
@@ -225,14 +261,16 @@ function wireKeyboard() {
     const tag = e.target.tagName?.toLowerCase();
     if (tag === 'input' || tag === 'textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
 
+    // Next, previous and shuffle take Shift, as next and previous do in
+    // YouTube's own player, so a stray keypress doesn't skip the track.
     switch (e.key.toLowerCase()) {
       case ' ':
         e.preventDefault();
         playback.togglePlay();
         break;
-      case 'n': playback.next(); break;
-      case 'p': playback.prev(); break;
-      case 's': $('btnShuffle').click(); break;
+      case 'n': if (e.shiftKey) playback.next(); break;
+      case 'p': if (e.shiftKey) playback.prev(); break;
+      case 's': if (e.shiftKey) $('btnShuffle').click(); break;
       // Only ours to handle while the mute button is up; with the video on,
       // YouTube's own chrome owns the shortcut.
       case 'm':
