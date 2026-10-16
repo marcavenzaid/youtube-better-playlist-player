@@ -15,7 +15,7 @@
 
 <div class="app">
   <header>
-    <a id="logo" href="/">Better <span>Playlist</span> Player</a>
+    <a id="logo" href="./">Better <span>Playlist</span> Player</a>
     <div class="spacer"></div>
     <button class="btn sm ghost icon" id="btnSettings" type="button"
             aria-label="Settings" title="Settings">
@@ -108,7 +108,7 @@
         <div class="sec-body" id="playlistsBody">
           <div id="sources"></div>
 
-          <!-- Up only while no key can be found, in .env or in Settings. The
+          <!-- Up only while no key is set in Settings. The
                cap bites at Load, so the warning belongs next to that button
                rather than buried in the modal. -->
           <div class="notice hidden" id="noKeyNotice">
@@ -196,14 +196,11 @@
       <input type="password" id="apiKey" placeholder="AIza..."
              autocomplete="off" spellcheck="false" style="margin-top:6px">
 
-      <div class="tiny hidden" id="envHint" style="margin-top:6px; color:var(--ok)"></div>
-
       <div class="tiny muted" style="margin-top:8px; line-height:1.7">
-        Set <code>YOUTUBE_API_KEY</code> in the <code>.env</code> file to have this
-        filled in for you; anything typed here overrides it. Without a key the
-        player reads playlists through a hidden embed, which returns video IDs
-        only. Titles are filled in afterwards, and YouTube caps the embed
-        at roughly 200 items.
+        A key loads playlists in full. It is kept only in this browser.
+        Without a key the player reads playlists through a hidden embed, which
+        returns video IDs only. Titles are filled in afterwards, and YouTube
+        caps the embed at roughly 200 items.
       </div>
 
       <!-- The walkthrough is only worth its space while there is no key; once
@@ -227,8 +224,7 @@
           </li>
           <li>
             Copy the key (it starts with <code>AIza</code>) and paste
-            it in the box above, or into <code>.env</code> as
-            <code>YOUTUBE_API_KEY=AIza...</code> and reload.
+            it in the box above.
           </li>
         </ol>
         <div>
@@ -285,8 +281,7 @@
         </li>
         <li>
           <b>Reset everything:</b> deletes the saved session, then reloads the
-          page. A key in <code>.env</code> and the title cache are kept. This
-          cannot be undone.
+          page. The title cache is kept. This cannot be undone.
         </li>
       </ul>
 
@@ -326,7 +321,7 @@
           <li>the API key typed in Settings</li>
         </ul>
         <p>
-          Kept: a key in <code>.env</code>, and the cached video titles.
+          Kept: the cached video titles.
           The page reloads straight away, and this cannot be undone.
         </p>
       </div>

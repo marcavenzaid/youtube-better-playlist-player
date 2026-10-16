@@ -8,7 +8,6 @@
 import { state, restore, newSource, saveNow } from './state.js';
 import { emit, EV } from './events.js';
 import { $, toast } from './utils.js';
-import * as env from './env.js';
 import * as playback from './playback.js';
 import * as loader from './loader.js';
 import * as sourcesUi from './ui/sources.js';
@@ -23,9 +22,6 @@ function load() {
 async function boot() {
   const restored = restore();
   if (!state.sources.length) state.sources.push(newSource());
-
-  // Before the UI, so Settings can show whether a key came from .env.
-  await env.load();
 
   sourcesUi.init(load);
   queueUi.init();

@@ -7,7 +7,6 @@ import { $, toast, fmtTime, fmtBytes, paintRange } from '../utils.js';
 import * as storage from '../storage.js';
 import * as playback from '../playback.js';
 import * as titles from '../titles.js';
-import * as env from '../env.js';
 import * as queue from './queue.js';
 
 const ICON_VOL =
@@ -200,20 +199,10 @@ function wireSettings() {
   const key = $('apiKey');
   key.value = state.apiKey;
 
-  // Make it obvious where a key is coming from, so an empty box does not look
-  // like "no key configured" when .env has one. Same test the loader makes:
-  // a typed key wins, .env is the fallback, and neither means the embed path.
   const syncKeyHint = () => {
-    const fromEnv = env.hasApiKey();
-    key.placeholder = fromEnv ? 'Using the key from .env' : 'AIza...';
-    $('envHint').classList.toggle('hidden', !fromEnv);
-    $('envHint').textContent = state.apiKey.trim()
-      ? 'This key overrides the one in .env.'
-      : `Loaded from .env (...${env.apiKey().slice(-4)}).`;
-
-    // With no key to be had, the walkthrough goes up in here and the warning
-    // goes up beside Load; with one, both are noise and come down.
-    const none = !state.apiKey.trim() && !fromEnv;
+    // With no key, the walkthrough goes up in here and the warning goes up
+    // beside Load; with one, both are noise and come down.
+    const none = !state.apiKey.trim();
     $('apiKeyHelp').classList.toggle('hidden', !none);
     $('noKeyNotice').classList.toggle('hidden', !none);
   };

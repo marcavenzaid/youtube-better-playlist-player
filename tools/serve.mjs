@@ -1,12 +1,10 @@
 /**
  * Static file server for local development. No dependencies.
  *
- * Exists for two reasons:
- *   1. The app is built from ES modules, which browsers refuse to load over
- *      file://. It also guarantees .js is served with a JavaScript MIME type -
- *      modules are rejected outright if it is anything else.
- *   2. A static page cannot read a .env file. This server can, and hands the
- *      contents to the page at GET /api/config.
+ * The app is built from ES modules, which browsers refuse to load over
+ * file://. This also guarantees .js is served with a JavaScript MIME type -
+ * modules are rejected outright if it is anything else. PORT can be set in
+ * .env.
  *
  *   node tools/serve.mjs [port]
  */
@@ -75,8 +73,7 @@ export function parseEnv(text) {
 }
 
 /**
- * Read .env fresh. Done per request so editing the file only needs a page
- * reload, not a server restart.
+ * Read .env. Missing is fine.
  * @returns {Promise<Record<string, string>>}
  */
 async function readEnv() {
@@ -104,8 +101,7 @@ export function resolvePath(urlPath, root = ROOT) {
   const relative = normalize(decoded).replace(/^([/\\])+/, '');
 
   // Never serve dotfiles. Without this, .env and .git would be readable over
-  // HTTP - the whole point of putting the key in .env is that the page asks
-  // the server for it rather than fetching the file itself.
+  // HTTP.
   if (relative.split(/[/\\]/).some((segment) => segment.startsWith('.'))) {
     return null;
   }
@@ -121,19 +117,6 @@ export function resolvePath(urlPath, root = ROOT) {
 
 const server = createServer(async (req, res) => {
   const url = req.url || '/';
-
-  // Config endpoint: everything the page is allowed to know from .env.
-  if (url.split('?')[0] === '/api/config') {
-    const env = await readEnv();
-    const body = JSON.stringify({ youtubeApiKey: env.YOUTUBE_API_KEY || '' });
-    res.writeHead(200, {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store'
-    });
-    res.end(body);
-    return;
-  }
-
   const path = resolvePath(url);
   if (!path) {
     res.writeHead(403, { 'content-type': 'text/plain; charset=utf-8' });
@@ -181,11 +164,6 @@ async function start() {
   server.listen(port, () => {
     const url = `http://localhost:${port}/index.html`;
     console.log(`Better Playlist Player -> ${url}`);
-    console.log(
-      env.YOUTUBE_API_KEY
-        ? `Using the YouTube API key from .env (...${env.YOUTUBE_API_KEY.slice(-4)})`
-        : 'No YOUTUBE_API_KEY in .env - running in no-key mode.'
-    );
     console.log('Press Ctrl+C to stop.');
 
     if (!process.argv.includes('--no-open')) {

@@ -16,19 +16,18 @@ This player shuffles the whole queue once, up front, with a fair Fisher–Yates 
 **With or without an API key:** 
 It works without one. An optional YouTube Data API key makes it better:
 
-- **Without a key**, playlists are read through a hidden YouTube embed. That
-  caps each playlist at roughly **200 tracks**, and the queue starts out
-  showing video IDs. Titles fill in over the next few seconds, or as each
-  track plays.
-- **With a key**, playlists load **in full** and titles arrive with the
-  tracks.
+- **Without a key**, playlists are read through a hidden YouTube embed. 
+  That caps each playlist at roughly **200 tracks**, and the queue starts out showing video IDs. 
+  Titles fill in over the next few seconds, or as each track plays.
+- **With a key**, playlists load **in full** and titles arrive with the tracks.
 
-The key is free from the Google Cloud console; see
-[API key (optional)](#api-key-optional) for setup.
+The key is free from the Google Cloud console. See [API key (optional)](#api-key-optional) for setup.
 
 ## Running it
 
-Double-click **`serve.cmd`**, or:
+**Online:** open **https://marcavenzaid.github.io/youtube-better-playlist-player/**. Nothing to install. If you have an API key, paste it into Settings.
+
+**Locally:** double-click **`serve.cmd`**, or:
 
 ```
 npm start           # node tools/serve.mjs
@@ -49,11 +48,11 @@ The bundled server is plain Node with no dependencies.
 ## Using it
 
 1. Paste a playlist ID or any YouTube URL containing `list=`.
-2. **+ Add playlist** for as many more as you want. Each gets a colour, shown
-   as a dot beside every track it contributed.
+2. **+ Add playlist** for as many more as you want. Each gets a colour, shown as a dot beside every track it contributed.
 3. **Load**.
 
-Playlists, the queue, the track you're on (not the time within it), and your player settings are saved to `localStorage`, so reopening puts you back where you were. Press **Load** again to re-fetch. 
+Playlists, the queue, the track you're on (not the time within it), and your player settings are saved to `localStorage`, 
+so reopening puts you back where you were. Press **Load** again to re-fetch. 
 The per-playlist switch excludes a source from the next load without deleting the ID. 
 If a playlist loads but stops early, its tracks are kept, and a warning appears under it in the sidebar.
 
@@ -89,7 +88,7 @@ To check it:
 The queue panel can hide thumbnails. 
 Settings -> **Stored data** shows how much the browser is holding, split into the **saved session** (playlists, the queue and your place in it, player settings, and a typed API key) and the **title cache**. 
 **Clear title cache** empties the cache. The queue keeps its titles, and the cache only matters on the next **Load** without an API key. 
-**Reset everything** asks first, then deletes the saved session and reloads. A `.env` key and the title cache survive.
+**Reset everything** asks first, then deletes the saved session and reloads. The title cache survives.
 
 ## Project layout
 
@@ -97,7 +96,7 @@ Settings -> **Stored data** shows how much the browser is holding, split into th
 index.html            Markup only. No logic, no styles
 serve.cmd             Double-click launcher
 package.json          Scripts only. No dependencies
-.env                  Your API key and port (gitignored)
+.env                  Local server port (gitignored)
 .env.example          Template, committed
 
 src/css/
@@ -113,7 +112,6 @@ src/js/
   events.js           Tiny pub/sub
   utils.js            DOM and formatting helpers
   storage.js          localStorage that never throws
-  env.js              Fetches /api/config for the .env key
   shuffle.js          randInt, fisherYates
   titles.js           Title cache and oEmbed backfill
   playlists.js        ID parsing, and the two extraction paths
@@ -158,32 +156,16 @@ This one generates a **full permutation up front** ([`src/js/shuffle.js`](src/js
 
 ## API key (optional)
 
-Put it in **`.env`**:
+Open **Settings** and paste it into the **API key** box. The key is stored only in your browser's `localStorage` and is sent only to Google's API.
 
-```
-YOUTUBE_API_KEY=AIza...
-```
-
-Then reload the page. The server re-reads `.env` on every request, so no restart is needed. Settings will show `Loaded from .env`. A key typed into the Settings box overrides `.env`, which is handy for trying a different one without editing files.
-
-A static page cannot read `.env` by itself. [`tools/serve.mjs`](tools/serve.mjs) parses it and exposes just the key at `GET /api/config`, which [`src/js/env.js`](src/js/env.js) fetches at boot. 
-
-Two consequences:
-- Under the Python fallback in `serve.cmd` there is no `/api/config`, so the `.env` key is ignored. 
-  Use the Settings box instead, or install Node. It also ignores `PORT` and always uses 8123.
-- `.env` keeps the key out of your source files, **not** out of the browser.
-  It is delivered to the page and visible in devtools. That is inherent to a client-side app; restrict the key to the YouTube Data API in the Google console. The server refuses to serve dotfiles over HTTP (`/.env` -> 403), so it is not readable as a file.
-
-Or skip `.env` entirely: Settings -> paste a key there.
+Get one at [console.cloud.google.com](https://console.cloud.google.com/) -> enable *YouTube Data API v3* -> create an API key. 
+While you are there, restrict the key to the YouTube Data API.
 
 |  | No key | With key |
 |---|---|---|
 | How playlists are read | Cued into a hidden embed, IDs read back | Data API `playlistItems` |
 | Playlist length | ~200 items (YouTube's embed cap) | Full |
 | Titles | Backfilled via oEmbed, else as tracks play | Arrive with the videos |
-
-Get one at [console.cloud.google.com](https://console.cloud.google.com/) -> enable *YouTube Data API v3* -> create an API key. 
-It is stored only in your browser's `localStorage`.
 
 Without a key, the embed returns video IDs and nothing else, so the queue first paints with raw IDs like `dQw4w9WgXcQ`. 
 Names then arrive from the cache (instant), oEmbed (seconds, and blockable), or the player itself as each track starts (always works, one at a time).

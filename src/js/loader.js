@@ -18,7 +18,6 @@ import * as playlists from './playlists.js';
 import * as titles from './titles.js';
 import * as playback from './playback.js';
 import * as yt from './youtube.js';
-import * as env from './env.js';
 
 let busy = false;
 /** @type {AbortController|null} */
@@ -83,9 +82,7 @@ export async function loadAll(embedHost) {
  * @param {AbortSignal} signal aborted by cancel()
  */
 async function rebuild(active, embedHost, signal) {
-  // A key typed into Settings overrides .env, so the UI always wins when both
-  // are present and there is a way to try a different key without editing files.
-  const apiKey = state.apiKey.trim() || env.apiKey();
+  const apiKey = state.apiKey.trim();
   /** @type {import('./state.js').Track[]} */
   const tracks = [];
   const seen = new Set();

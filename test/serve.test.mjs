@@ -5,7 +5,7 @@ import { parseEnv, resolvePath } from '../tools/serve.mjs';
 /* ------------------------------------------------------------- parseEnv --- */
 
 test('parses a plain key=value', () => {
-  assert.deepEqual(parseEnv('YOUTUBE_API_KEY=abc123'), { YOUTUBE_API_KEY: 'abc123' });
+  assert.deepEqual(parseEnv('PORT=abc123'), { PORT: 'abc123' });
 });
 
 test('ignores comments and blank lines', () => {
@@ -13,11 +13,11 @@ test('ignores comments and blank lines', () => {
 # a comment
    # an indented comment
 
-YOUTUBE_API_KEY=abc123
+PORT=abc123
 
 # trailing comment
 `);
-  assert.deepEqual(env, { YOUTUBE_API_KEY: 'abc123' });
+  assert.deepEqual(env, { PORT: 'abc123' });
 });
 
 test('trims whitespace around keys and values', () => {
@@ -41,7 +41,7 @@ test('keeps a # that is part of the value', () => {
 });
 
 test('accepts an export prefix', () => {
-  assert.equal(parseEnv('export YOUTUBE_API_KEY=abc123').YOUTUBE_API_KEY, 'abc123');
+  assert.equal(parseEnv('export PORT=abc123').PORT, 'abc123');
 });
 
 test('keeps = characters inside a value', () => {
@@ -49,9 +49,9 @@ test('keeps = characters inside a value', () => {
 });
 
 test('treats an empty value as empty, not missing', () => {
-  const env = parseEnv('YOUTUBE_API_KEY=');
-  assert.equal(env.YOUTUBE_API_KEY, '');
-  assert.ok('YOUTUBE_API_KEY' in env);
+  const env = parseEnv('PORT=');
+  assert.equal(env.PORT, '');
+  assert.ok('PORT' in env);
 });
 
 test('handles CRLF line endings', () => {
@@ -76,8 +76,6 @@ test('serves index.html for the root path', () => {
 });
 
 test('refuses dotfiles so .env is never served', () => {
-  // The whole point of .env is that the page asks the server for the key
-  // rather than being able to fetch the file.
   assert.equal(resolvePath('/.env', ROOT), null);
   assert.equal(resolvePath('/.env.example', ROOT), null);
   assert.equal(resolvePath('/.git/config', ROOT), null);
